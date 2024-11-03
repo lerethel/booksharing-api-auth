@@ -1,0 +1,1 @@
+This is the authorization microservice for my booksharing app API. It uses Redis and Keyv for session-based authorization. Refer to the gateway [README](https://github.com/lerethel/booksharing-api-gateway/blob/master/README.md) to learn how to use it.

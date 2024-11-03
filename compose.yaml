@@ -1,0 +1,33 @@
+services:
+  redisdb:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    expose:
+      - 6379
+    volumes:
+      - db:/data
+    networks:
+      - booksharing-auth-db
+  booksharing-auth:
+    depends_on:
+      - redisdb
+    image: booksharing-auth
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    env_file: ./.env
+    ports:
+      - 3003:3003
+    networks:
+      - booksharing-auth-db
+      - booksharing
+    command: npm run start
+
+volumes:
+  db:
+networks:
+  booksharing-auth-db:
+    name: booksharing-auth-db
+  booksharing:
+    external: true
