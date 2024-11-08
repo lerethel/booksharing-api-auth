@@ -1,13 +1,14 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { AuthService } from './auth.service';
+import { User } from './interfaces/user.interface';
 
 @Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @MessagePattern({ cmd: 'login' })
-  createToken(@Payload('user') user: unknown) {
+  createToken(@Payload('user') user: User) {
     return this.authService.createToken(user);
   }
 
@@ -22,7 +23,7 @@ export class AuthController {
   }
 
   @MessagePattern({ cmd: 'logoutEverywhere' })
-  revokeUserTokens(@Payload('user') user: unknown) {
-    return this.authService.revokeUserTokens(user);
+  revokeUserTokens(@Payload('id') id: unknown) {
+    return this.authService.revokeUserTokens(id);
   }
 }

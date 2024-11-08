@@ -6,23 +6,24 @@ import {
 } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import Keyv from 'keyv';
+import { User } from './interfaces/user.interface';
 
 const maxAge = 1000 * 60 * 60 * 24 * 180;
 
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject('TOKEN_CACHE') private readonly tokenCache: Keyv<unknown>,
+    @Inject('TOKEN_CACHE') private readonly tokenCache: Keyv<User>,
     @Inject('USER_CACHE') private readonly userCache: Keyv<string[]>,
   ) {}
 
-  async createToken(user: unknown) {
+  async createToken(user: User) {
     const token = randomBytes(24).toString('hex');
-    const userTokens = (await this.userCache.get(String(user))) ?? [];
+    const userTokens = (await this.userCache.get(String(user.id))) ?? [];
 
     await Promise.all([
       this.tokenCache.set(token, user, maxAge),
-      this.userCache.set(String(user), [...userTokens, token], maxAge),
+      this.userCache.set(String(user.id), [...userTokens, token], maxAge),
     ]);
 
     return { token, maxAge };
@@ -34,7 +35,7 @@ export class AuthService {
     }
 
     const user = await this.tokenCache.get(token);
-    const userTokens = user ? await this.userCache.get(String(user)) : null;
+    const userTokens = user ? await this.userCache.get(String(user.id)) : null;
 
     if (!user || !userTokens) {
       throw new ForbiddenException();
@@ -43,7 +44,7 @@ export class AuthService {
     // Extend the session lifetime if the user is active.
     await Promise.all([
       this.tokenCache.set(token, user, maxAge),
-      this.userCache.set(String(user), userTokens, maxAge),
+      this.userCache.set(String(user.id), userTokens, maxAge),
     ]);
 
     return user;
@@ -54,10 +55,10 @@ export class AuthService {
     return null;
   }
 
-  async revokeUserTokens(user: unknown) {
+  async revokeUserTokens(id: unknown) {
     // Records in tokenCache aren't deleted because they won't pass
     // the validity check above anyway and eventially will expire.
-    await this.userCache.delete(String(user));
+    await this.userCache.delete(String(id));
     return null;
   }
 }
