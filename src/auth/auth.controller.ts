@@ -22,6 +22,11 @@ export class AuthController {
     return this.authService.revokeToken(token);
   }
 
+  @MessagePattern({ cmd: 'updateRole' })
+  updateUserRole(@Payload('user') user: User) {
+    return this.authService.updateUserRole(user);
+  }
+
   @MessagePattern({ cmd: 'logoutEverywhere' })
   revokeUserTokens(@Payload('id') id: unknown) {
     return this.authService.revokeUserTokens(id);

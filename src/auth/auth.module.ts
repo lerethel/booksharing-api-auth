@@ -20,7 +20,7 @@ import { AuthService } from './auth.service';
     },
     {
       // This instance maps users to tokens. Each user will have an array of tokens.
-      // This makes it possible to delete all of a user's tokens without iterating
+      // This makes it possible to delete or update all of a user's tokens without iterating
       // through the entire cache, although it does double the cache size.
       provide: 'USER_CACHE',
       useFactory: () =>

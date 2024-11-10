@@ -50,6 +50,20 @@ export class AuthService {
     return user;
   }
 
+  async updateUserRole(user: User) {
+    const userTokens = await this.userCache.get(String(user.id));
+
+    // If there are no tokens, it's unclear if the user doesn't
+    // exist or is logged out everywhere, so do nothing in that case.
+    if (userTokens) {
+      userTokens.forEach(
+        async (token) => await this.tokenCache.set(token, user, maxAge),
+      );
+    }
+
+    return null;
+  }
+
   async revokeToken(token: string) {
     await this.tokenCache.delete(token);
     return null;
